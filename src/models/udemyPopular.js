@@ -7,4 +7,4 @@ const udemyPopularSchema = mongoose.Schema({
 
 // Create a model based on the schema
 
-module.exports = mongoose.model("UdemyPopular", udemyPopularSchema, "udemyPopularTest")  // chage to udemyPop after testiing
+module.exports = mongoose.model("UdemyPopular", udemyPopularSchema, "udemyPop")  // chage to udemyPop after testiing

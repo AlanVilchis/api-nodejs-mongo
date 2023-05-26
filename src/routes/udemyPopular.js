@@ -5,6 +5,8 @@ const router = express.Router();
 
 // need change to POST into database
 router.get("/udemy/popular", async (req, res) => {
+    const pagination = 5;
+    await udemyPopularSchema.deleteMany({});
     const browser = await puppeteer.launch({
         headless: false,
         //userDataDir: "./tmp"
@@ -45,34 +47,47 @@ router.get("/udemy/popular", async (req, res) => {
     //console.log(filteredTitleList);
 
     //List to Json
-    const jsonArray = filteredTitleList.map(item => {
-        return { name: item };
+    const nameDocuments = [];
+
+    filteredTitleList.forEach((string) => {
+        const newString = new udemyPopularSchema({ name: string });
+        nameDocuments.push(newString);
     });
 
-    const jsonString = JSON.stringify(jsonArray);
+    udemyPopularSchema.insertMany(nameDocuments)
+        .then(() => {
+            console.log('Items added to MongoDB');
+        })
+        .catch((error) => {
+            console.error('Error adding items to MongoDB', error);
+        });
 
-    console.log(jsonString);
+   
+    
+    
+
+    console.log(filteredTitleList);
     //await browser.close();
-    res.send(jsonString)
+    res.send(filteredTitleList)
 });
 
 
-//Only working with name marametr
+//Only working with name parametr
 router.get("/udemy/popular/count/:parametr", (req, res) => {
     const { parametr } = req.params;
     udemyPopularSchema.aggregate([
-    { $group: { _id: "$" + parametr, count: { $sum: 1 } } },
-    { $project: { group: "$_id", value: "$count", _id: 0 } }, //modify json fields
-    { $sort: { value: -1 } },                                 // sort descending
-    //{ $limit: 10 }                                          // choose the number of groups
-])
-    .then((results) => {
-    res.json(results);
-    })
-    .catch((err) => {
-    console.log(err);
-    res.status(500).send('Error retrieving how many times a skill/name repeats');
-    });
+        { $group: { _id: "$" + parametr, count: { $sum: 1 } } },
+        { $project: { group: "$_id", value: "$count", _id: 0 } }, //modify json fields
+        { $sort: { value: -1 } },                                 // sort descending
+        //{ $limit: 10 }                                          // choose the number of groups
+    ])
+        .then((results) => {
+            res.json(results);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send('Error retrieving how many times a skill/name repeats');
+        });
 });
 
 module.exports = router;
