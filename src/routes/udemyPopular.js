@@ -4,9 +4,11 @@ const puppeteer = require('puppeteer');
 const router = express.Router();
 
 // need change to POST into database
-router.get("/udemy/popular", async (req, res) => {
-    const pagination = 5;
-    await udemyPopularSchema.deleteMany({});
+router.get("/udemy/popular/:pag", async (req, res) => {
+    const {pag} = req.params;
+    if (pag === "1"){
+        await udemyPopularSchema.deleteMany({});
+    }
     const browser = await puppeteer.launch({
         headless: false,
         //userDataDir: "./tmp"
@@ -15,8 +17,10 @@ router.get("/udemy/popular", async (req, res) => {
     await page.setExtraHTTPHeaders({
         'Accept-Language': 'en',
     });
-    await page.goto('https://www.udemy.com/courses/development/?sort=popularity');
     const titleList = [];
+    const url = "https://www.udemy.com/courses/development/?p=" + pag + "&sort=highest-rated"
+    console.log(url)
+    await page.goto(url);
     await page.waitForSelector('.course-list--container--FuG0T');
     const courseHandles = await page.$$('.course-list--container--FuG0T > .popper-module--popper--2BpLn');
 
@@ -41,8 +45,24 @@ router.get("/udemy/popular", async (req, res) => {
         } catch (error) { }
     }
     // "AI supervised learning classification algorithm" to detect unwanted characters
-    const stringsToRemove = ["Aprende", 'Completo', 'Creaci', 'Crea', 'Curso', 'Empresas', 'La', 'Lenguaje', 'Master', 'Maximice', 'Programacion', 'Temas', "Introducci", "Desarrollar", "Sistema", "Reservas", "Marcado", "Aplicaci", "Studio"]
-    const filteredTitleList = titleList.filter(item => !stringsToRemove.includes(item));
+    const lowercaseList = titleList.map(str => str.toLowerCase());
+    const stringsToRemove = ['a', 'advanced', 'all', 'app', 'application', 'applications', 'apps', 'assess', 'based', 'basics', 'beginners', 
+                             'begginner', 'bible', 'boring', 'bootcamp', 'build', 'building', 'budget', 'business', 'challenging', 'challenges', 'code', 'coding',
+                             'complete', 'competitive', 'course', 'creating', 'data', 'developer', 'developers', 'development', 'detection', 'dive', 'ds', 'enterprise',
+                             'essential', 'estate', 'exercises', 'face', 'flow', 'for', 'free', 'from', 'guide', 'hero', 'integrate', 'intelligent', 'job', 'kit', 
+                              'knowledge', 'learn', 'learning', 'level', 'life', 'live', 'making', 'masterclass', 'mastering', 'need', 'online', 'option', 'personal',
+                            'practical', 'product', 'programming', 'project', 'promo', 'quick', 'real', 'role', 'scratch', 'specification', 'start', 'the', 'theory',
+                            'vol', 'weather', 'what', 'with', 'you', 'zero'] 
+    //Filter    
+    const lowerFilteredTitleList = lowercaseList.filter(item => !stringsToRemove.includes(item));
+
+    //Exceptions
+    let updatedStrings = lowerFilteredTitleList.map(str => str.replace('website', 'web'));
+    updatedStrings = updatedStrings.map(str => str.replace('game', 'gamedev'));
+    updatedStrings = updatedStrings.map(str => str.replace('machine', 'machine learning'));
+    updatedStrings = updatedStrings.map(str => str.replace('science', 'data science'));
+
+    const filteredTitleList = updatedStrings.map(str => str.charAt(0).toUpperCase() + str.slice(1));
     // POST into MongoDB using Mongoose, as a JSON, each string one object
     //console.log(filteredTitleList);
 
@@ -86,7 +106,7 @@ router.get("/udemy/popular/count/:parametr", (req, res) => {
         })
         .catch((err) => {
             console.log(err);
-            res.status(500).send('Error retrieving how many times a skill/name repeats');
+            res.status(500).send('Error retrieving how many times a skill/name repeats (Udemy)');
         });
 });
 
