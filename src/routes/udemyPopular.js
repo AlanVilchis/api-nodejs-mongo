@@ -23,6 +23,7 @@ router.get("/udemy/popular/:pag", async (req, res) => {
     await page.goto(url);
     await page.waitForSelector('.course-list--container--FuG0T');
     const courseHandles = await page.$$('.course-list--container--FuG0T > .popper-module--popper--2BpLn');
+    //console.log(courseHandles)
 
     for (const coursehandle of courseHandles) {
         try {

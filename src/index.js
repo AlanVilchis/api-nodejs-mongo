@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 require("dotenv").config();
 const certificationRoutes = require("./routes/certification")
 const udemyPopularRoutes = require("./routes/udemyPopular")
+const courseraRoutes = require("./routes/courseraCertification")
 
 const app = express();
 const port = process.env.PORT;
@@ -16,6 +17,7 @@ mongoose.connect(process.env.DB_URI)
 app.use(express.json())
 app.use("/api", certificationRoutes)
 app.use("/api", udemyPopularRoutes)
+app.use("/api", courseraRoutes)
 
 
 //routes 
