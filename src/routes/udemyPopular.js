@@ -48,19 +48,21 @@ router.get("/udemy/popular/:pag", async (req, res) => {
     // "AI supervised learning classification algorithm" to detect unwanted characters
     const lowercaseList = titleList.map(str => str.toLowerCase());
     const stringsToRemove = ['a', 'advanced', 'all', 'app', 'application', 'applications', 'apps', 'assess', 'based', 'basics', 'beginners', 
-                             'begginner', 'bible', 'boring', 'bootcamp', 'build', 'building', 'budget', 'business', 'challenging', 'challenges', 'code', 'coding',
+                             'begginner', 'bible', 'boring','boot', 'bootcamp', 'build', 'building', 'budget', 'business','camp', 'challenging', 'challenges', 'code', 'coding',
                              'complete', 'competitive', 'course', 'creating', 'data', 'developer', 'developers', 'development', 'detection', 'dive', 'ds', 'enterprise',
-                             'essential', 'estate', 'exercises', 'face', 'flow', 'for', 'free', 'from', 'guide', 'hero', 'integrate', 'intelligent', 'job', 'kit', 
-                              'knowledge', 'learn', 'learning', 'level', 'life', 'live', 'making', 'masterclass', 'mastering', 'need', 'online', 'option', 'personal',
-                            'practical', 'product', 'programming', 'project', 'promo', 'quick', 'real', 'role', 'scratch', 'specification', 'start', 'the', 'theory',
-                            'vol', 'weather', 'what', 'with', 'you', 'zero'] 
+                             'essential', 'essentials', 'estate', 'exercises', 'face', 'flow', 'for', 'free', 'from', 'guide', 'hero', 'integrate', 'intelligent', 'job', 'kit', 
+                              'knowledge', 'learn', 'learning', 'level', 'life', 'live', 'making','make', 'masterclass', 'mastering', 'need', 'online', 'option', 'personal',
+                            'practical', 'product', 'programming', 'project', 'promo', 'quick', 'real', 'recommender', 'role', 'scratch', 'specification', 'start', 'the', 'theory',
+                            'visualization','vol', 'weather', 'what', 'with', 'you', 'zero', 'how', 'beginner', 'income', 'bundle', 'things', 'hours', 'expert','your', 'create',
+                            'mastery'] 
     //Filter    
     const lowerFilteredTitleList = lowercaseList.filter(item => !stringsToRemove.includes(item));
 
     //Exceptions
     let updatedStrings = lowerFilteredTitleList.map(str => str.replace('website', 'web'));
-    updatedStrings = updatedStrings.map(str => str.replace('game', 'gamedev'));
+    updatedStrings = updatedStrings.map(str => str.replace('game', 'gameDev'));
     updatedStrings = updatedStrings.map(str => str.replace('machine', 'machine learning'));
+    updatedStrings = updatedStrings.map(str => str.replace('deep', 'deep learning'));
     updatedStrings = updatedStrings.map(str => str.replace('science', 'data science'));
 
     const filteredTitleList = updatedStrings.map(str => str.charAt(0).toUpperCase() + str.slice(1));
@@ -88,9 +90,29 @@ router.get("/udemy/popular/:pag", async (req, res) => {
     
 
     console.log(filteredTitleList);
-    //await browser.close();
+    await browser.close();
     res.send(filteredTitleList)
 });
+
+// DELETE route
+router.delete('/records/:value', async (req, res) => {
+    const value = req.params.value;
+  
+    try {
+      // Delete records with the specified value
+      const result = await udemyPopularSchema.deleteMany({ name: value });
+  
+      // Check if any records were deleted
+      if (result.deletedCount > 0) {
+        res.status(200).json({ message: 'Records deleted successfully' });
+      } else {
+        res.status(404).json({ message: 'No records found with the specified value' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'An error occurred while deleting the records' });
+    }
+  });
+  
 
 
 //Only working with name parametr
